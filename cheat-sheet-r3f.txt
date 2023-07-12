@@ -1,0 +1,218 @@
+// no animated model
+
+const model = useLoader(
+  GLTFLoader,
+  'src/assets/model/station.glb'
+)
+
+<Gltf
+  src="spacestation.glb"
+  castShadow
+  receiveShadow
+  position={[0, 0, 0]}
+/>
+
+
+
+// Orbit Controls
+
+<OrbitControls
+   makeDefault
+/>
+
+
+
+// Mesh
+
+<mesh scale={1} position={[0, 0, 0]}>
+   <boxGeometry />
+   <meshNormalMaterial />
+</mesh>
+
+
+
+{/* env map */}
+
+<Environment files="src/assets/space.hdr" background />
+
+
+
+// teleport when clicking planeBufferGeometry
+
+const TeleportButton = () => {
+  const { camera } = useThree();
+  const [isClicked, setIsClicked] = useState(false);
+  const handlePlaneClick = () => {
+    setIsClicked(true);
+    const newPosition = { x: 50, y: 10, z: 5 }; // Example position to move the camera
+    const newRotation = { x: 0, y: -5, z: 0 };
+    camera.position.set(newPosition.x, newPosition.y, newPosition.z);
+    camera.rotation.set(newRotation.x, newRotation.y, newRotation.z);
+    // window.location.href = 'http://localhost:5173/work';
+  };
+    
+  return (
+    <>
+      <mesh
+        onClick={handlePlaneClick}
+        rotation={[0, 5.5 * Math.PI, 0]}
+        position={[9, 0.5, 0]}
+      >
+        <planeBufferGeometry />
+        <meshStandardMaterial color={0xFF0000}/>
+      </mesh>
+      <mesh
+        rotation={[0, -5.5 * Math.PI, 0]}
+        position={[-9, 0.5, 0]}
+      >
+        <planeBufferGeometry />
+        <meshStandardMaterial color={0xFF0000}/>
+      </mesh>
+      <mesh
+        rotation={[0, Math.PI, 0]}
+        position={[0, 0.5, 12]}
+      >
+        <planeBufferGeometry />
+        <meshStandardMaterial color={0xFF0000}/>
+      </mesh>
+    </>
+  );
+};
+
+
+
+// add link on click
+
+const facebookClick = () => {
+    window.open("https://threejs.org/examples/?q=multiple#webgl_multiple_views");
+};
+
+onClick = {facebookClick}
+
+
+
+// Camera movement Function
+
+const cameraRef = useRef()
+
+function CameraMovement() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      setMousePos({
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: -(event.clientY / window.innerHeight) * 2 + 1,
+      });
+    };
+  
+    window.addEventListener('mousemove', handleMouseMove);
+  
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  useEffect(() => {
+    const camera = cameraRef.current;
+  
+    camera.position.x = mousePos.x * 2;
+    camera.position.y = mousePos.y * 2;
+  
+    camera.lookAt(0, 0, 0); // Adjust the target if needed
+  }, [mousePos]);
+  return null; // We'll add the logic here
+}
+
+return(
+  <>
+    <PerspectiveCamera
+      ref={cameraRef}
+      theatreKey="Camera3"
+      makeDefault
+      position={[0, 2, 15]}
+      fov={75}
+      near={0.01}
+      far={1000}
+    />
+
+    <CameraMovement />
+  </>
+)
+
+
+
+// Ground Function
+
+function Ground() {
+  const [floor] = useTexture(['src/assets/SurfaceImperfections003_1K_var1.jpg'])
+  return (
+    <Reflector 
+      blur={[400, 100]} 
+      resolution={512} 
+      args={[20, 20]} 
+      mirror={0.6} 
+      mixBlur={5} 
+      mixStrength={0.6} 
+      rotation={[-1.57, 0, 0]} 
+      position={[0, -4, 0]}
+      scale={5}
+    
+    >
+      {(Material, props) =>
+      <Material 
+        color="#444444" 
+        metalness={0.6} 
+        roughnessMap={floor}
+        normalScale={[3, 3]} {...props} 
+      />}
+    </Reflector>
+  )
+}
+
+return(
+  <>
+
+    <Ground />
+  </>
+)
+
+
+
+// Video on plane
+
+// Function for Video material
+function VideoMaterial({ url }) {
+  const texture = useVideoTexture(url)
+  return <meshBasicMaterial map={texture} toneMapped={false} />
+}
+
+return(
+  <>
+    <mesh theatreKey="vid1"
+        castShadow
+        position={[-2, 0, 0]}
+        rotation={[0, 0.5, 0]}
+        scale={[1, 1, 0]}
+
+      >
+        <planeGeometry />
+        <VideoMaterial url="src/assets/video/01BusinessCard.mp4"/>
+      </mesh>
+  </>
+)
+
+
+
+// Transparent Mesh
+
+<mesh 
+  ref={plane}
+  rotation={[0, 5.5 * Math.PI, 0]} 
+  position={[9, 1, 0]} 
+  onClick={onPlaneClick} 
+  scale={[4, 1, 1]}
+>
+  <planeBufferGeometry />
+  <meshBasicMaterial map={textureOurwork} transparent opacity={1} />
+</mesh>
