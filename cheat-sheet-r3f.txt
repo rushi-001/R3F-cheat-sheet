@@ -1,4 +1,4 @@
-// no animated model
+// not animated model
 
 const model = useLoader(
   GLTFLoader,
